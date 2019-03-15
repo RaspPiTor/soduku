@@ -14,7 +14,6 @@ class Soduku():
                 for row in range(x_offset, x_offset+3):
                     box.extend(self.rows[row][y_offset:y_offset+3])
                 self.boxes.append(box)
-        print(self.boxes)
     def is_valid(self):
         for box in self.boxes:
             for i in set(box):
@@ -38,22 +37,29 @@ class Soduku():
     def square_options(self, square):
         if self.data[square] is not None:
             return [self.data[square]]
-        valid = []
-        for i in range(10):
-            self.data[square] = i
-            if self.is_valid():
-                valid.append(i)
-        self.data[square] = None
-        return valid
+        row = [self.data[x] for x in self.rows[square // 9]]
+        column = [self.data[x] for x in self.columns[square % 9]]
+        for i in range(9):
+            if square in self.boxes[i]:
+                box = [self.data[x] for x in self.boxes[i]]
+        options = [i for i in range(1, 10) if i not in row and i not in column and i not in box]
+        return options
     def solve(self):
-        options = []
-        for i in range(81):
-            options.append(self.square_options(i))
-        total = 1
-        for i in options:
-            total *= len(i)
-        current = []
-        print(total, options)
+        old = self.data.copy()
+        options = [[x] for x in self.square_options(0)]
+        for i in range(1, 81):
+            new = []
+            for option in options:
+                self.data[:len(option)] = option
+                square_options = self.square_options(i)
+                if square_options:
+                    for x in square_options:
+                        new.append(option + [x])
+            print(i, len(new))
+            options = new
+        if len(options) == 1:
+            self.data = options[0]
+        return len(options)
 
 class GUI(ttk.Frame):
     def __init__(self, master=None):
@@ -94,7 +100,11 @@ class GUI(ttk.Frame):
         print(valid)
     def solve(self):
         self.verify()
-        self.soduku.solve()
+        result = self.soduku.solve()
+        for i, square in enumerate(self.squares):
+            square.delete(0, 'end')
+            square.insert(0, str(self.soduku.data[i]))
+        print(result)
             
         
 
