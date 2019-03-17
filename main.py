@@ -11,7 +11,7 @@ class FoundMinimum(Exception): pass
 
 class Sudoku():
     def __init__(self):
-        self.data = bytearray([0 for _ in range(81)])
+        self.data = [0 for _ in range(81)]
 
     def square_options(self, square, options=set(range(1,10))):
         data = self.data
@@ -24,6 +24,7 @@ class Sudoku():
                       + data[square % 9: 81: 9] # Columns
                       + data[square // 9 * 9: square // 9 * 9 + 9] # Rows
                       )
+                         +  data[square % 9: 81: 9] # Columns
         result = options.difference(exclude)
         if len(result) > 1:
             return result
@@ -37,7 +38,7 @@ class Sudoku():
         run = cProfile.Profile()
         run.enable()
         old = self.data.copy()
-        options = [bytearray([0] * len(self.data))]
+        options = [[0] * len(self.data)]
         start = time.time()
         for round_number in range(81):
             new = []
@@ -166,7 +167,7 @@ class GUI(ttk.Frame):
                     data = json.load(file)
                     if len(data) is 81 and isinstance(data, (list, tuple)):
                         if all(i in [0,1,2,3,4,5,6,7,8,9] for i in data):
-                            self.sudoku.data = bytearray(data)
+                            self.sudoku.data = list(data)
                             self.display()
                         else:
                             messagebox.showerror(message='Invalid contents')
@@ -182,7 +183,7 @@ class GUI(ttk.Frame):
         self.load()
         try:
             with filedialog.asksaveasfile(filetypes=[("JSON", "*.json")]) as file:
-                json.dump(tuple(self.sudoku.data), file)
+                json.dump(list(self.sudoku.data), file)
         except AttributeError:
             pass
 
