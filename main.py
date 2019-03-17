@@ -18,13 +18,13 @@ class Sudoku():
         if data[square] != 0:
             raise FoundMinimum(square, [data[square]])
         start = square // 27 * 27 + square // 3 % 3 * 3
-        exclude = [*data[start: start + 3], # Box 1st layer
-                   *data[start + 9: start + 12], # Box 2nd layer
-                   *data[start + 18: start + 21], # Box 3rd layer
-                   *data[square % 9: 81: 9], # Columns
-                   *data[square // 9 * 9: square // 9 * 9 + 9] # Rows
-                      ]
-        result = options.difference(exclude)
+        exclude = (data[start: start + 3], # Box 1st layer
+                   data[start + 9: start + 12], # Box 2nd layer
+                   data[start + 18: start + 21], # Box 3rd layer
+                   data[square % 9: 81: 9], # Columns
+                   data[square // 9 * 9: square // 9 * 9 + 9] # Rows
+                      )
+        result = options.difference(*exclude)
         if len(result) > 1:
             return result
         elif len(result) == 1:
