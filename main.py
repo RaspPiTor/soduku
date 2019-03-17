@@ -99,8 +99,11 @@ class GUI(ttk.Frame):
         valid = self.soduku.is_valid()
         print(valid)
     def solve(self):
+        old = self.soduku.data.copy()
         self.verify()
         result = self.soduku.solve()
+        if result != 1:
+            self.soduku.data = old
         for i, square in enumerate(self.squares):
             square.delete(0, 'end')
             square.insert(0, str(self.soduku.data[i]))
