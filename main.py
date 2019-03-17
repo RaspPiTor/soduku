@@ -33,12 +33,12 @@ class Sudoku():
         for round_number in range(81):
             new = []
             for option in options:
-                self.data = old.copy()
                 to_explore = []
                 for i, value in enumerate(option):
                     if value is not None:
                         self.data[i] = value
                     else:
+                        self.data[i] = old[i]
                         to_explore.append(i)
                 ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
                 pos, values = min(ops, key=lambda x: len(x[1]))
