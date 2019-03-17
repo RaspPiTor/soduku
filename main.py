@@ -71,7 +71,7 @@ class GUI(ttk.Frame):
                 square.grid(row=x, column=y)
                 self.squares.append(square)
         clear = ttk.Button(self, text='Clear', command=self.clear)
-        clear.grid(row=12, column=0, columnspan=5, sticky='nesw')
+        clear.grid(row=12, column=0, columnspan=6, sticky='nesw')
 
         solve = ttk.Button(self, text='Solve', command=self.solve)
         solve.grid(column=12, row=0, rowspan=2, columnspan=10, sticky='nesw')
