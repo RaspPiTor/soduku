@@ -11,9 +11,9 @@ class Sudoku():
         self.data = [None for _ in range(81)]
 
     def square_options(self, square, options=set(range(1,10))):
-        if self.data[square] is not None:
-            return [self.data[square]]
         data = self.data
+        if data[square] is not None:
+            return [data[square]]
         start = square // 27 * 27 + square // 3 % 3 * 3
         exclude = set(data[start: start + 3] # Box 1st layer
                       + data[start + 9: start + 12] # Box 2nd layer
