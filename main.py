@@ -65,12 +65,16 @@ class Sudoku():
                     next_option[pos] = value
                     new.append(next_option)
                 if time.time() - start > 0.1:
+                    run.disable()
                     yield False, 0, round_number, 81
+                    run.enable()
                     start = time.time()
             print('Number:%s Options:%s' % (round_number, len(new)))
             options = new
         if len(options) == 1:
             self.data = options[0]
+        run.disable()
+        run.print_stats('tottime')
         yield True, len(options), 81, 81
 
 class GUI(ttk.Frame):
