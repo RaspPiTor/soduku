@@ -8,11 +8,11 @@ import json
 
 class Sudoku():
     def __init__(self):
-        self.data = [None for _ in range(81)]
+        self.data = bytearray([0 for _ in range(81)])
 
     def square_options(self, square, options=set(range(1,10))):
         data = self.data
-        if data[square] is not None:
+        if data[square] != 0:
             return [data[square]]
         start = square // 27 * 27 + square // 3 % 3 * 3
         exclude = set(data[start: start + 3] # Box 1st layer
@@ -32,14 +32,14 @@ class Sudoku():
         run = cProfile.Profile()
         run.enable()
         old = self.data.copy()
-        options = [[None] * len(self.data)]
+        options = [bytearray([0] * len(self.data))]
         start = time.time()
         for round_number in range(81):
             new = []
             for option in options:
                 to_explore = []
                 for i, value in enumerate(option):
-                    if value is not None:
+                    if value != 0:
                         self.data[i] = value
                     else:
                         self.data[i] = old[i]
@@ -107,7 +107,7 @@ class GUI(ttk.Frame):
             if n:
                 self.sudoku.data[i] = int(n)
             else:
-                self.sudoku.data[i]= None
+                self.sudoku.data[i]= 0
     def display(self):
          for i, square in enumerate(self.squares):
             square.delete(0, 'end')
@@ -119,7 +119,7 @@ class GUI(ttk.Frame):
             if n:
                 if not n.isnumeric():
                     square.delete(0, 'end')
-                elif int(n) not in [0,1,2,3,4,5,6,7,8,9]:
+                elif int(n) not in [1,2,3,4,5,6,7,8,9]:
                     square.delete(0, 'end')
         try:
             done, length, value, maximum = next(self.solver)
