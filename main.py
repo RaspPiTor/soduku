@@ -25,9 +25,10 @@ class Sudoku():
                    data[square // 9 * 9: square // 9 * 9 + 9] # Rows
                       )
         result = options.difference(*exclude)
-        if len(result) > 1:
-            return result
-        elif len(result) == 1:
+        length = len(result)
+        if length > 1:
+            return length, square, result
+        elif length == 1:
             raise FoundMinimum(square, result)
         else:
             raise FoundConflict
@@ -51,8 +52,8 @@ class Sudoku():
                         to_explore.append(i)
                 found_min = False
                 try:
-                    ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
-                    pos, values = min(ops, key=lambda x: len(x[1]))
+                    ops = tuple(map(self.square_options, to_explore))
+                    _, pos, values = min(ops)
                 except FoundMinimum as error:
                     found_min = True
                     pos, values = error.args
