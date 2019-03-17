@@ -69,7 +69,6 @@ class Sudoku():
                     yield False, 0, round_number, 81
                     run.enable()
                     start = time.time()
-            print('Number:%s Options:%s' % (round_number, len(new)))
             options = new
         if len(options) == 1:
             self.data = options[0]
