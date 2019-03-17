@@ -21,7 +21,11 @@ class Sudoku():
                       + data[square % 9: 81: 9] # Columns
                       + data[square // 9 * 9: square // 9 * 9 + 9] # Rows
                       )
-        return options.difference(exclude)
+        result = options.difference(exclude)
+        if result:
+            return result
+        else:
+            raise ValueError
 
     def solve(self):
         import cProfile
@@ -40,10 +44,11 @@ class Sudoku():
                     else:
                         self.data[i] = old[i]
                         to_explore.append(i)
-                ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
-                pos, values = min(ops, key=lambda x: len(x[1]))
-                if len(values) == 0:
+                try:
+                    ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
+                except ValueError:
                     continue
+                pos, values = min(ops, key=lambda x: len(x[1]))
                 for value in values:
                     next_option = option.copy()
                     next_option[pos] = value
