@@ -1,7 +1,10 @@
 import itertools
+from tkinter import filedialog
+from tkinter import messagebox
 import tkinter.ttk as ttk
 import tkinter
 import time
+import json
 
 class Soduku():
     def __init__(self):
@@ -95,6 +98,11 @@ class GUI(ttk.Frame):
 
         self.progress = ttk.Progressbar(self)
         self.progress.grid(column=12, row=4, rowspan=2)
+
+        solve = ttk.Button(self, text='Open', command=self.open)
+        solve.grid(column=12, row=6, rowspan=2, columnspan=10, sticky='nesw')
+        stop = ttk.Button(self, text='Save', command=self.save)
+        stop.grid(column=12, row=8, rowspan=2, columnspan=10, sticky='nesw')
         self.solver = iter(())
         self.refresh()
     def clean(self):
@@ -152,9 +160,28 @@ class GUI(ttk.Frame):
     def clear(self):
         self.soduku.data = [None] * len(self.soduku.data)
         self.display()
-
-
-
+    def open(self):
+        path = filedialog.askopenfilename(filetypes=[("JSON", "*.json")])
+        if path:
+            try:
+                with open(path) as file:
+                    data = json.load(file)
+                    if len(data) is 81 and isinstance(data, (list, tuple)):
+                        if all(i in [1,2,3,4,5,6,7,8,9,None] for i in data):
+                            self.soduku.data = data
+                            self.display()
+                        else:
+                            messagebox.showerror(message='Invalid contents')
+                    else:
+                        messagebox.showerror(message='Not 81 item list')
+            except json.JSONDecodeError:
+                messagebox.showerror(message='JSON decode error')
+            except UnicodeDecodeError:
+                messagebox.showerror(message='Invalid characters')
+    def save(self):
+        self.load()
+        with filedialog.asksaveasfile(filetypes=[("JSON", "*.json")]) as file:
+            json.dump(self.soduku.data, file)
 
 
 if __name__ == '__main__':
