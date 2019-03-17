@@ -54,27 +54,34 @@ class Sudoku():
                    + self.data[start + 9: start + 12]
                    + self.data[start + 18: start + 21])
         return options.difference(box)
+
     def solve(self):
         old = self.data.copy()
-        for i in range(1, 81):
-            now = self.square_options(i)
-            if len(now) == 1:
-                self.data[i] = list(now)[0]
         sopts = [self.square_options(i) for i in range(81)]
-        options = [[x] for x in self.square_options(0)]
+        options = [[None] * len(self.data)]
         start = time.time()
-        for i in range(1, 81):
+        for round_number in range(81):
             new = []
             for option in options:
-                self.data[:len(option)] = option
-                square_options = self.square_options(i, sopts[i])
-                if square_options:
-                    for x in square_options:
-                        new.append(option + [x])
+                self.data = old.copy()
+                to_explore = []
+                for i, value in enumerate(option):
+                    if value is not None:
+                        self.data[i] = value
+                    else:
+                        to_explore.append(i)
+                ops = [(i, self.square_options(i, sopts[i])) for i in to_explore]
+                pos, values = min(ops, key=lambda x: len(x[1]))
+                if len(values) == 0:
+                    continue
+                for value in values:
+                    next_option = option.copy()
+                    next_option[pos] = value
+                    new.append(next_option)
                 if time.time() - start > 0.1:
-                    yield False, 0, i, 81
+                    yield False, 0, round_number, 81
                     start = time.time()
-            print('Number:%s Options:%s' % (i, len(new)))
+            print('Number:%s Options:%s' % (round_number, len(new)))
             options = new
         if len(options) == 1:
             self.data = options[0]
