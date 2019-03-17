@@ -142,6 +142,10 @@ class GUI(ttk.Frame):
                 if length == 1:
                     self.display()
                 else:
+                    if length == 0:
+                        messagebox.showerror(message='No Solutions')
+                    else:
+                        messagebox.showerror(message='%s Solutions' % length)
                     self.load()
         except StopIteration:
             pass
@@ -180,8 +184,11 @@ class GUI(ttk.Frame):
                 messagebox.showerror(message='Invalid characters')
     def save(self):
         self.load()
-        with filedialog.asksaveasfile(filetypes=[("JSON", "*.json")]) as file:
-            json.dump(self.soduku.data, file)
+        try:
+            with filedialog.asksaveasfile(filetypes=[("JSON", "*.json")]) as file:
+                json.dump(self.soduku.data, file)
+        except AttributeError:
+            pass
 
 
 if __name__ == '__main__':
