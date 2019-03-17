@@ -52,6 +52,9 @@ class Sudoku():
         return options.difference(exclude)
 
     def solve(self):
+        import cProfile
+        run = cProfile.Profile()
+        run.enable()
         old = self.data.copy()
         sopts = [self.square_options(i) for i in range(81)]
         options = [[None] * len(self.data)]
@@ -66,7 +69,7 @@ class Sudoku():
                         self.data[i] = value
                     else:
                         to_explore.append(i)
-                ops = [(i, self.square_options(i, sopts[i])) for i in to_explore]
+                ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
                 pos, values = min(ops, key=lambda x: len(x[1]))
                 if len(values) == 0:
                     continue
