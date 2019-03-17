@@ -183,6 +183,8 @@ class GUI(ttk.Frame):
                 messagebox.showerror(message='JSON decode error')
             except UnicodeDecodeError:
                 messagebox.showerror(message='Invalid characters')
+            except FileNotFoundError:
+                messagebox.showerror(message='No such file')
     def save(self):
         self.load()
         try:
