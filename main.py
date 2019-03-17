@@ -50,12 +50,10 @@ class Sudoku():
                     else:
                         self.data[i] = old[i]
                         to_explore.append(i)
-                found_min = False
                 try:
                     ops = tuple(map(self.square_options, to_explore))
                     _, pos, values = min(ops)
                 except FoundMinimum as error:
-                    found_min = True
                     pos, value = error.args
                     option[pos] = value
                     new.append(option)
