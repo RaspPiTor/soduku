@@ -162,7 +162,7 @@ class GUI(ttk.Frame):
         self.progress['value'] = 0
         self.progress['maximum'] = 1
     def clear(self):
-        for i in range(len(self.soduku.data)):
+        for i in range(len(self.sudoku.data)):
             self.sudoku.data[i] = 0
         self.display()
     def open(self):
