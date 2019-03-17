@@ -41,12 +41,13 @@ class Soduku():
     def square_options(self, square):
         if self.data[square] is not None:
             return [self.data[square]]
-        row = [self.data[x] for x in self.rows[square // 9]]
-        column = [self.data[x] for x in self.columns[square % 9]]
+        exclude = [self.data[x] for x in self.rows[square // 9]]
+        exclude.extend(self.data[x] for x in self.columns[square % 9])
         for i in range(9):
             if square in self.boxes[i]:
-                box = [self.data[x] for x in self.boxes[i]]
-        options = [i for i in range(1, 10) if i not in row and i not in column and i not in box]
+                exclude.extend(self.data[x] for x in self.boxes[i])
+                break
+        options = [i for i in range(1, 10) if i not in exclude]
         return options
     def solve(self):
         old = self.data.copy()
