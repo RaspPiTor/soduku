@@ -163,7 +163,7 @@ class GUI(ttk.Frame):
         print(valid)
     def solve(self):
         self.verify()
-        self.solver = self.sudoku .solve()
+        self.solver = self.sudoku.solve()
     def stop(self):
         self.solver = iter(())
         self.progress['value'] = 0
