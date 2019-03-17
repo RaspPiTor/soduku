@@ -49,10 +49,10 @@ class Sudoku():
         options = options.difference(columns)
         if not options:
             return ()
-        for i in range(9):
-            if square in self.boxes[i]:
-                box = {self.data[x] for x in self.boxes[i]}
-                break
+        start = square // 27 * 27 + square // 3 % 3 * 3
+        box = set(self.data[start: start + 3]
+                   + self.data[start + 9: start + 12]
+                   + self.data[start + 18: start + 21])
         return options.difference(box)
     def solve(self):
         old = self.data.copy()
