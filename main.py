@@ -18,7 +18,7 @@ class Sudoku():
         if data[square] != 0:
             raise FoundMinimum(square, [data[square]])
         start = square // 27 * 27 + square // 3 % 3 * 3
-        exclude = set(data[start: start + 3] # Box 1st layer
+        exclude = (data[start: start + 3] # Box 1st layer
                       + data[start + 9: start + 12] # Box 2nd layer
                       + data[start + 18: start + 21] # Box 3rd layer
                       + data[square % 9: 81: 9] # Columns
