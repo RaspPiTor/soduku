@@ -6,7 +6,7 @@ import tkinter
 import time
 import json
 
-class Soduku():
+class Sudoku():
     def __init__(self):
         self.data = [None for _ in range(81)]
         self.rows = [[x + i for i in range(9)] for x in range(0, 81, 9)]
@@ -77,7 +77,7 @@ class Soduku():
 class GUI(ttk.Frame):
     def __init__(self, master=None):
         ttk.Frame.__init__(self, master)
-        self.soduku = Soduku()
+        self.sudoku  = Sudoku()
         self.squares = []
         for row, column in ((3, 3), (7, 8)):
             ttk.Label(self, text=' ').grid(row=row)
@@ -119,14 +119,14 @@ class GUI(ttk.Frame):
         for i, square in enumerate(self.squares):
             n = square.get()
             if n:
-                self.soduku.data[i] = int(n)
+                self.sudoku.data[i] = int(n)
             else:
-                self.soduku.data[i]= None
+                self.sudoku.data[i]= None
     def display(self):
          for i, square in enumerate(self.squares):
             square.delete(0, 'end')
-            if self.soduku.data[i] is not None:
-                square.insert(0, str(self.soduku.data[i]))
+            if self.sudoku.data[i] is not None:
+                square.insert(0, str(self.sudoku.data[i]))
     def refresh(self):
         for square in self.squares:
             n = square.get()
@@ -153,17 +153,17 @@ class GUI(ttk.Frame):
         self.after(10, self.refresh)
     def verify(self):
         self.load()
-        valid = self.soduku.is_valid()
+        valid = self.sudoku.is_valid()
         print(valid)
     def solve(self):
         self.verify()
-        self.solver = self.soduku.solve()
+        self.solver = self.sudoku .solve()
     def stop(self):
         self.solver = iter(())
         self.progress['value'] = 0
         self.progress['maximum'] = 1
     def clear(self):
-        self.soduku.data = [None] * len(self.soduku.data)
+        self.sudoku.data = [None] * len(self.sudoku.data)
         self.display()
     def open(self):
         path = filedialog.askopenfilename(filetypes=[("JSON", "*.json")])
@@ -173,7 +173,7 @@ class GUI(ttk.Frame):
                     data = json.load(file)
                     if len(data) is 81 and isinstance(data, (list, tuple)):
                         if all(i in [1,2,3,4,5,6,7,8,9,None] for i in data):
-                            self.soduku.data = data
+                            self.sudoku .data = data
                             self.display()
                         else:
                             messagebox.showerror(message='Invalid contents')
@@ -189,7 +189,7 @@ class GUI(ttk.Frame):
         self.load()
         try:
             with filedialog.asksaveasfile(filetypes=[("JSON", "*.json")]) as file:
-                json.dump(self.soduku.data, file)
+                json.dump(self.sudoku.data, file)
         except AttributeError:
             pass
 
