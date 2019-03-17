@@ -38,30 +38,30 @@ class Soduku():
                     if [self.data[x] for x in columns].count(n) > 1:
                         return False
         return True
-    def square_options(self, square):
+    def square_options(self, square, options=set(range(1,10))):
         if self.data[square] is not None:
             return [self.data[square]]
-        exclude = [self.data[x] for x in self.rows[square // 9]]
-        exclude.extend(self.data[x] for x in self.columns[square % 9])
+        exclude = {self.data[x] for x in self.rows[square // 9]}
+        exclude.update(self.data[x] for x in self.columns[square % 9])
         for i in range(9):
             if square in self.boxes[i]:
-                exclude.extend(self.data[x] for x in self.boxes[i])
+                exclude.update(self.data[x] for x in self.boxes[i])
                 break
-        options = [i for i in range(1, 10) if i not in exclude]
-        return options
+        return options.difference(exclude)
     def solve(self):
         old = self.data.copy()
         for i in range(1, 81):
             now = self.square_options(i)
             if len(now) == 1:
-                self.data[i] = now[0]
+                self.data[i] = list(now)[0]
+        sopts = [self.square_options(i) for i in range(81)]
         options = [[x] for x in self.square_options(0)]
         start = time.time()
         for i in range(1, 81):
             new = []
             for option in options:
                 self.data[:len(option)] = option
-                square_options = self.square_options(i)
+                square_options = self.square_options(i, sopts[i])
                 if square_options:
                     for x in square_options:
                         new.append(option + [x])
