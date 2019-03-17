@@ -155,7 +155,8 @@ class GUI(ttk.Frame):
         self.progress['value'] = 0
         self.progress['maximum'] = 1
     def clear(self):
-        self.sudoku.data = [None] * len(self.sudoku.data)
+        for i in range(len(self.soduku.data)):
+            self.sudoku.data[i] = 0
         self.display()
     def open(self):
         path = filedialog.askopenfilename(filetypes=[("JSON", "*.json")])
@@ -164,8 +165,8 @@ class GUI(ttk.Frame):
                 with open(path) as file:
                     data = json.load(file)
                     if len(data) is 81 and isinstance(data, (list, tuple)):
-                        if all(i in [1,2,3,4,5,6,7,8,9,None] for i in data):
-                            self.sudoku .data = data
+                        if all(i in [0,1,2,3,4,5,6,7,8,9] for i in data):
+                            self.sudoku.data = bytearray(data)
                             self.display()
                         else:
                             messagebox.showerror(message='Invalid contents')
@@ -181,7 +182,7 @@ class GUI(ttk.Frame):
         self.load()
         try:
             with filedialog.asksaveasfile(filetypes=[("JSON", "*.json")]) as file:
-                json.dump(self.sudoku.data, file)
+                json.dump(tuple(self.sudoku.data), file)
         except AttributeError:
             pass
 
