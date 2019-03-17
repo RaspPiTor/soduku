@@ -6,6 +6,9 @@ import tkinter
 import time
 import json
 
+class FoundConflict(Exception): pass
+class FoundMinimum(Exception): pass
+
 class Sudoku():
     def __init__(self):
         self.data = bytearray([0 for _ in range(81)])
@@ -22,10 +25,12 @@ class Sudoku():
                       + data[square // 9 * 9: square // 9 * 9 + 9] # Rows
                       )
         result = options.difference(exclude)
-        if result:
+        if len(result) > 1:
             return result
+        elif len(result) == 1:
+            raise FoundMinimum(square, result)
         else:
-            raise ValueError
+            raise FoundConflict
 
     def solve(self):
         import cProfile
@@ -44,11 +49,16 @@ class Sudoku():
                     else:
                         self.data[i] = old[i]
                         to_explore.append(i)
+                found_min = False
                 try:
                     ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
-                except ValueError:
+                except FoundMinimum as error:
+                    found_min = True
+                    pos, values = error.args
+                except FoundConflict:
                     continue
-                pos, values = min(ops, key=lambda x: len(x[1]))
+                if not found_min:
+                    pos, values = min(ops, key=lambda x: len(x[1]))
                 for value in values:
                     next_option = option.copy()
                     next_option[pos] = value
