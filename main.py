@@ -24,7 +24,6 @@ class Sudoku():
                       + data[square % 9: 81: 9] # Columns
                       + data[square // 9 * 9: square // 9 * 9 + 9] # Rows
                       )
-                         +  data[square % 9: 81: 9] # Columns
         result = options.difference(exclude)
         if len(result) > 1:
             return result
