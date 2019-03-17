@@ -16,7 +16,7 @@ class Sudoku():
     def square_options(self, square, options=set(range(1,10))):
         data = self.data
         if data[square] != 0:
-            raise FoundMinimum(square, [data[square]])
+            raise FoundMinimum(square, data[square])
         start = square // 27 * 27 + square // 3 % 3 * 3
         exclude = (data[start: start + 3], # Box 1st layer
                    data[start + 9: start + 12], # Box 2nd layer
@@ -29,7 +29,7 @@ class Sudoku():
         if length > 1:
             return length, square, result
         elif length == 1:
-            raise FoundMinimum(square, result)
+            raise FoundMinimum(square, next(iter(result)))
         else:
             raise FoundConflict
 
@@ -56,7 +56,10 @@ class Sudoku():
                     _, pos, values = min(ops)
                 except FoundMinimum as error:
                     found_min = True
-                    pos, values = error.args
+                    pos, value = error.args
+                    option[pos] = value
+                    new.append(option)
+                    continue
                 except FoundConflict:
                     continue
                 for value in values:
