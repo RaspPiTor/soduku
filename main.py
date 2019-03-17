@@ -133,6 +133,7 @@ class GUI(ttk.Frame):
             pass
         self.after(10, self.refresh)
     def solve(self):
+        self.load()
         self.solver = self.sudoku.solve()
     def stop(self):
         self.solver = iter(())
