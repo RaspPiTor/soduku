@@ -52,13 +52,12 @@ class Sudoku():
                 found_min = False
                 try:
                     ops = tuple(zip(to_explore, map(self.square_options, to_explore)))
+                    pos, values = min(ops, key=lambda x: len(x[1]))
                 except FoundMinimum as error:
                     found_min = True
                     pos, values = error.args
                 except FoundConflict:
                     continue
-                if not found_min:
-                    pos, values = min(ops, key=lambda x: len(x[1]))
                 for value in values:
                     next_option = option.copy()
                     next_option[pos] = value
