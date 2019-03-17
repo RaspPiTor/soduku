@@ -1,6 +1,7 @@
 import itertools
 import tkinter.ttk as ttk
 import tkinter
+import time
 
 class Soduku():
     def __init__(self):
@@ -46,7 +47,12 @@ class Soduku():
         return options
     def solve(self):
         old = self.data.copy()
+        for i in range(1, 81):
+            now = self.square_options(i)
+            if len(now) == 1:
+                self.data[i] = now[0]
         options = [[x] for x in self.square_options(0)]
+        start = time.time()
         for i in range(1, 81):
             new = []
             for option in options:
@@ -55,30 +61,63 @@ class Soduku():
                 if square_options:
                     for x in square_options:
                         new.append(option + [x])
-            print(i, len(new))
+                if time.time() - start > 0.1:
+                    yield False, 0, i, 81
+                    start = time.time()
+            print('Number:%s Options:%s' % (i, len(new)))
             options = new
         if len(options) == 1:
             self.data = options[0]
-        return len(options)
+        yield True, len(options), 81, 81
 
 class GUI(ttk.Frame):
     def __init__(self, master=None):
         ttk.Frame.__init__(self, master)
         self.soduku = Soduku()
         self.squares = []
-        for i in [3,7]:
-            ttk.Label(self, text=' ').grid(row=i)
-            ttk.Label(self, text=' ').grid(column=i)
+        for row, column in ((3, 3), (7, 8)):
+            ttk.Label(self, text=' ').grid(row=row)
+            ttk.Label(self, text=' ').grid(column=column)
         for x in [0,1,2,4,5,6,8,9,10]:
-            for y in [0,1,2,4,5,6,8,9,10]:
+            for y in [0,1,2,5,6,7,9,10,11]:
                 square = ttk.Entry(self, width=2)
                 square.grid(row=x, column=y)
                 self.squares.append(square)
         verify = ttk.Button(self, text='Verify', command=self.verify)
-        verify.grid(row=11, columnspan=10)
+        verify.grid(row=12, column=0, columnspan=6, sticky='nesw')
+        clear = ttk.Button(self, text='Clear', command=self.clear)
+        clear.grid(row=12, column=7, columnspan=5, sticky='nesw')
+
         solve = ttk.Button(self, text='Solve', command=self.solve)
-        solve.grid(row=12, columnspan=10)
+        solve.grid(column=12, row=0, rowspan=2, columnspan=10, sticky='nesw')
+        stop = ttk.Button(self, text='Stop', command=self.stop)
+        stop.grid(column=12, row=2, rowspan=2, columnspan=10, sticky='nesw')
+
+        self.progress = ttk.Progressbar(self)
+        self.progress.grid(column=12, row=4, rowspan=2)
+        self.solver = iter(())
         self.refresh()
+    def clean(self):
+        for square in self.squares:
+            n = square.get()
+            if n:
+                if not n.isnumeric():
+                    square.delete(0, 'end')
+                elif int(n) not in [0,1,2,3,4,5,6,7,8,9]:
+                    square.delete(0, 'end')
+    def load(self):
+        self.clean()
+        for i, square in enumerate(self.squares):
+            n = square.get()
+            if n:
+                self.soduku.data[i] = int(n)
+            else:
+                self.soduku.data[i]= None
+    def display(self):
+         for i, square in enumerate(self.squares):
+            square.delete(0, 'end')
+            if self.soduku.data[i] is not None:
+                square.insert(0, str(self.soduku.data[i]))
     def refresh(self):
         for square in self.squares:
             n = square.get()
@@ -87,29 +126,34 @@ class GUI(ttk.Frame):
                     square.delete(0, 'end')
                 elif int(n) not in [0,1,2,3,4,5,6,7,8,9]:
                     square.delete(0, 'end')
+        try:
+            done, length, value, maximum = next(self.solver)
+            self.progress['value'] = value
+            self.progress['maximum'] = maximum
+            if done:
+                if length == 1:
+                    self.display()
+                else:
+                    self.load()
+        except StopIteration:
+            pass
         self.after(10, self.refresh)
     def verify(self):
-        self.refresh()
-        for i, square in enumerate(self.squares):
-            n = square.get()
-            if n:
-                self.soduku.data[i] = int(n)
-            else:
-                self.soduku.data[i]= None
+        self.load()
         valid = self.soduku.is_valid()
         print(valid)
     def solve(self):
-        old = self.soduku.data.copy()
         self.verify()
-        result = self.soduku.solve()
-        if result != 1:
-            self.soduku.data = old
-        for i, square in enumerate(self.squares):
-            square.delete(0, 'end')
-            square.insert(0, str(self.soduku.data[i]))
-        print(result)
-            
-        
+        self.solver = self.soduku.solve()
+    def stop(self):
+        self.solver = iter(())
+        self.progress['value'] = 0
+        self.progress['maximum'] = 1
+    def clear(self):
+        self.soduku.data = [None] * len(self.soduku.data)
+        self.display()
+
+
 
 
 
