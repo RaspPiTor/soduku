@@ -41,13 +41,19 @@ class Sudoku():
     def square_options(self, square, options=set(range(1,10))):
         if self.data[square] is not None:
             return [self.data[square]]
-        exclude = {self.data[x] for x in self.rows[square // 9]}
-        exclude.update(self.data[x] for x in self.columns[square % 9])
+        rows = set(self.data[square // 9 * 9: square // 9 * 9 + 9])
+        options = options.difference(rows)
+        if not options:
+            return ()
+        columns = set(self.data[square % 9: 81: 9])
+        options = options.difference(columns)
+        if not options:
+            return ()
         for i in range(9):
             if square in self.boxes[i]:
-                exclude.update(self.data[x] for x in self.boxes[i])
+                box = {self.data[x] for x in self.boxes[i]}
                 break
-        return options.difference(exclude)
+        return options.difference(box)
     def solve(self):
         old = self.data.copy()
         for i in range(1, 81):
