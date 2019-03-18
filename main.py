@@ -56,6 +56,18 @@ class Sudoku():
                     continue
                 except FoundConflict:
                     continue
+                row = set(option[pos // 9 * 9:pos // 9 * 9 + 9])
+                for i in range(pos // 9 * 9, pos // 9 * 9 + 9):
+                    if not option[i]:
+                        row.update(ops[to_explore.index(i)][2])
+                if not {1,2,3,4,5,6,7,8,9}.issubset(row):
+                    continue
+                column = set(option[pos % 9: 81: 9])
+                for i in range(pos % 9, 81, 9):
+                    if not option[i]:
+                        column.update(ops[to_explore.index(i)][2])
+                if not {1,2,3,4,5,6,7,8,9}.issubset(column):
+                    continue
                 for value in values:
                     next_option = option.copy()
                     next_option[pos] = value
