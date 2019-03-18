@@ -148,9 +148,9 @@ class GUI(ttk.Frame):
                     else:
                         messagebox.showerror(message='%s Solutions' % length)
                     self.load()
+            self.after(1, self.refresh)
         except StopIteration:
-            pass
-        self.after(10, self.refresh)
+            self.after(10, self.refresh)
     def solve(self):
         self.load()
         self.solver = self.sudoku.solve()
