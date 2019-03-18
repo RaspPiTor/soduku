@@ -37,18 +37,15 @@ class Sudoku():
         import cProfile
         run = cProfile.Profile()
         run.enable()
-        old = self.data.copy()
-        options = [[0] * len(self.data)]
+        options = [self.data.copy()]
         start = time.time()
-        for round_number in range(81):
+        for round_number in range(81 - self.data.count(0), 81):
             new = []
             for option in options:
+                self.data = option
                 to_explore = []
                 for i, value in enumerate(option):
-                    if value:
-                        self.data[i] = value
-                    else:
-                        self.data[i] = old[i]
+                    if not value:
                         to_explore.append(i)
                 try:
                     ops = tuple(map(self.square_options, to_explore))
