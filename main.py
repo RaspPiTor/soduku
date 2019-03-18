@@ -44,13 +44,13 @@ class Sudoku():
             new = []
             for option in options:
                 to_explore = []
-                self.data = list(self.data)
+                self.data = list(old)
                 for i, value in enumerate(option):
                     if value != '0':
                         self.data[i] = value
                     else:
-                        self.data[i] = old[i]
                         to_explore.append(i)
+                
                 self.data = ''.join(self.data)
                 try:
                     ops = tuple(map(self.square_options, to_explore))
