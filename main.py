@@ -45,7 +45,7 @@ class Sudoku():
             for option in options:
                 to_explore = []
                 for i, value in enumerate(option):
-                    if value != 0:
+                    if value:
                         self.data[i] = value
                     else:
                         self.data[i] = old[i]
