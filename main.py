@@ -38,8 +38,9 @@ class Sudoku():
         run = cProfile.Profile()
         run.enable()
         options = [self.data.copy()]
+        size = self.data.count(0)
         start = time.time()
-        for round_number in range(81 - self.data.count(0), 81):
+        for round_number in range(size):
             new = []
             for option in options:
                 self.data = option
@@ -63,7 +64,7 @@ class Sudoku():
                     new.append(next_option)
                 if time.time() - start > 0.1:
                     run.disable()
-                    yield False, 0, round_number, 81
+                    yield False, 0, round_number, size
                     run.enable()
                     start = time.time()
             options = new
@@ -71,7 +72,7 @@ class Sudoku():
             self.data = options[0]
         run.disable()
         run.print_stats('tottime')
-        yield True, len(options), 81, 81
+        yield True, len(options), size, size
 
 class GUI(ttk.Frame):
     def __init__(self, master=None):
