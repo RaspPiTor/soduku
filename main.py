@@ -29,7 +29,7 @@ class Sudoku():
         if length > 1:
             return length, square, result
         elif length == 1:
-            raise FoundMinimum(square, next(iter(result)))
+            raise FoundMinimum(square, *result)
         else:
             raise FoundConflict
 
