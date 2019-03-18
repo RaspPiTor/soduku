@@ -15,8 +15,6 @@ class Sudoku():
 
     def square_options(self, square, options=set(range(1,10))):
         data = self.data
-        if data[square] != 0:
-            raise FoundMinimum(square, data[square])
         start = square // 27 * 27 + square // 3 % 3 * 3
         exclude = (data[start: start + 3], # Box 1st layer
                    data[start + 9: start + 12], # Box 2nd layer
