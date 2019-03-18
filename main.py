@@ -13,9 +13,9 @@ class Sudoku():
     def __init__(self):
         self.data = [0 for _ in range(81)]
 
-    def square_options(self, square, options=set(range(1,10))):
+    def square_options(self, square, options=set('123456789')):
         data = self.data
-        if data[square] != 0:
+        if data[square] != '0':
             raise FoundMinimum(square, data[square])
         start = square // 27 * 27 + square // 3 % 3 * 3
         exclude = (data[start: start + 3], # Box 1st layer
@@ -37,19 +37,21 @@ class Sudoku():
         import cProfile
         run = cProfile.Profile()
         run.enable()
-        old = self.data.copy()
-        options = [[0] * len(self.data)]
+        old = ''.join(tuple(map(str, self.data)))
+        options = [['0'] * len(self.data)]
         start = time.time()
         for round_number in range(81):
             new = []
             for option in options:
                 to_explore = []
+                self.data = list(self.data)
                 for i, value in enumerate(option):
-                    if value != 0:
+                    if value != '0':
                         self.data[i] = value
                     else:
                         self.data[i] = old[i]
                         to_explore.append(i)
+                self.data = ''.join(self.data)
                 try:
                     ops = tuple(map(self.square_options, to_explore))
                     _, pos, values = min(ops)
