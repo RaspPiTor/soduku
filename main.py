@@ -17,23 +17,35 @@ class SudokuSpawn(multiprocessing.Process):
         self.out_queue = out_queue
         self.data = [0 for _ in range(81)]
 
-    def square_options(self, square, options=set(range(1,10))):
+    def square_options(self, to_explore):
+        options={1, 2, 3, 4, 5, 6, 7, 8, 9}
+        min_length = 11
+        min_result = 0, options
         data = self.data
-        start = square // 27 * 27 + square // 3 % 3 * 3
-        exclude = (data[start: start + 3], # Box 1st layer
-                   data[start + 9: start + 12], # Box 2nd layer
-                   data[start + 18: start + 21], # Box 3rd layer
-                   data[square % 9: 81: 9], # Columns
-                   data[square // 9 * 9: square // 9 * 9 + 9] # Rows
-                      )
-        result = options.difference(*exclude)
-        length = len(result)
-        if length > 1:
-            return length, square, result
-        elif length == 1:
-            raise FoundMinimum(square, *result)
-        else:
-            raise FoundConflict
+        rows = [set(data[i:i + 9]) for i in (0, 9, 18, 27, 36, 45, 54, 63, 72)]
+        columns = [set(data[i:81:9]) for i in (0, 1, 2, 3, 4, 5, 6, 7, 8)]
+        boxes = [set(data[i:i + 3]
+                     + data[i + 9:i + 12]
+                     + data[i + 18:i + 21])
+                 for i in (0, 3, 6,
+                           27, 30, 33,
+                           54, 57, 60)
+                 ]
+        for square in to_explore:
+            result = options.difference(rows[square // 9],
+                                        columns[square % 9],
+                                        boxes[square // 27 * 3
+                                              + square // 3 % 3])
+            length = len(result)
+            if length < min_length:
+                if length == 0:
+                    return False, (0, set())
+                elif length == 1:
+                    self.data[square] = tuple(result)[0]
+                else:
+                    min_result = square, result
+                    min_lenth = length
+        return True, min_result
     def run(self):
         in_queue = self.in_queue
         out_queue = self.out_queue
@@ -47,54 +59,17 @@ class SudokuSpawn(multiprocessing.Process):
                 out_queue.put(self.data.copy())
                 self.data = in_queue.get()
                 continue
-            try:
-                ops = tuple(map(self.square_options, to_explore))
-                _, pos, values = min(ops)
-            except FoundMinimum as error:
-                pos, value = error.args
-                self.data[pos] = value
-                continue
-            except FoundConflict:
+            done, (pos, values) = self.square_options(to_explore)
+            if done:
+                values = tuple(values)
+                for value in values[:-1]:
+                    next_option = self.data.copy()
+                    next_option[pos] = value
+                    out_queue.put(next_option)
+                self.data[pos] = values[-1]
+            else:
                 self.data = in_queue.get()
                 continue
-            
-            row = set(self.data[pos // 9 * 9:pos // 9 * 9 + 9])
-            for i in range(pos // 9 * 9, pos // 9 * 9 + 9):
-                if not self.data[i]:
-                    row.update(ops[to_explore.index(i)][2])
-            if not {1,2,3,4,5,6,7,8,9}.issubset(row):
-                self.data = in_queue.get()
-                continue
-            column = set(self.data[pos % 9: 81: 9])
-            for i in range(pos % 9, 81, 9):
-                if not self.data[i]:
-                    column.update(ops[to_explore.index(i)][2])
-            if not {1,2,3,4,5,6,7,8,9}.issubset(column):
-                self.data = in_queue.get()
-                continue
-            start = pos // 27 * 27 + pos // 3 % 3 * 3
-            box = set(self.data[start: start + 3]
-                      + self.data[start + 9: start + 12]
-                      + self.data[start + 18: start + 21])
-            for i in (start, start + 1, start + 2,
-                      start + 9, start + 10, start + 11,
-                      start + 18, start + 19, start + 20):
-                if not self.data[i]:
-                    box.update(ops[to_explore.index(i)][2])
-            if not {1,2,3,4,5,6,7,8,9}.issubset(box):
-                self.data = in_queue.get()
-                continue
-            
-            values = tuple(values)
-            for value in values[:-1]:
-                next_option = self.data.copy()
-                next_option[pos] = value
-                out_queue.put(next_option)
-            self.data[pos] = values[-1]
-
-
-class FoundConflict(Exception): pass
-class FoundMinimum(Exception): pass
 
 class SudokuSolver(threading.Thread):
     def __init__(self):
@@ -141,7 +116,6 @@ class SudokuSolver(threading.Thread):
                 else:
                     valid = False
                     break
-                    print('Invalid', result)
             if valid:
                 if 0 not in result:
                     with self.solution_lock:
