@@ -143,9 +143,6 @@ class GUI(ttk.Frame):
         stop = ttk.Button(self, text='Stop', command=self.stop)
         stop.grid(column=12, row=2, rowspan=2, columnspan=10, sticky='nesw')
 
-        self.progress = ttk.Progressbar(self)
-        self.progress.grid(column=12, row=4, rowspan=2)
-
         solve = ttk.Button(self, text='Open', command=self.open)
         solve.grid(column=12, row=6, rowspan=2, columnspan=10, sticky='nesw')
         stop = ttk.Button(self, text='Save', command=self.save)
@@ -200,8 +197,6 @@ class GUI(ttk.Frame):
         self.after(50, self.refresh)
     def stop(self):
         self.solver.stop()
-        self.progress['value'] = 0
-        self.progress['maximum'] = 1
         self.solved = True
     def clear(self):
         self.stop()
