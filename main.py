@@ -41,7 +41,7 @@ class SudokuSpawn(multiprocessing.Process):
                 if length == 0:
                     return False, (0, set())
                 elif length == 1:
-                    self.data[square] = tuple(result)[0]
+                    return True, (square, result)
                 else:
                     min_result = square, result
                     min_lenth = length
@@ -69,7 +69,6 @@ class SudokuSpawn(multiprocessing.Process):
                 self.data[pos] = values[-1]
             else:
                 self.data = in_queue.get()
-                continue
 
 class SudokuSolver(threading.Thread):
     def __init__(self):
