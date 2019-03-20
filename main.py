@@ -194,7 +194,7 @@ class GUI(ttk.Frame):
                     self.solved = True
         except StopIteration:
             pass
-        self.after(50, self.refresh)
+        self.after(10, self.refresh)
     def stop(self):
         self.solver.stop()
         self.solved = True
