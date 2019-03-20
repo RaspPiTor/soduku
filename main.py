@@ -57,6 +57,34 @@ class SudokuSpawn(multiprocessing.Process):
             except FoundConflict:
                 self.data = in_queue.get()
                 continue
+            
+            row = set(self.data[pos // 9 * 9:pos // 9 * 9 + 9])
+            for i in range(pos // 9 * 9, pos // 9 * 9 + 9):
+                if not self.data[i]:
+                    row.update(ops[to_explore.index(i)][2])
+            if not {1,2,3,4,5,6,7,8,9}.issubset(row):
+                self.data = in_queue.get()
+                continue
+            column = set(self.data[pos % 9: 81: 9])
+            for i in range(pos % 9, 81, 9):
+                if not self.data[i]:
+                    column.update(ops[to_explore.index(i)][2])
+            if not {1,2,3,4,5,6,7,8,9}.issubset(column):
+                self.data = in_queue.get()
+                continue
+            start = pos // 27 * 27 + pos // 3 % 3 * 3
+            box = set(self.data[start: start + 3]
+                      + self.data[start + 9: start + 12]
+                      + self.data[start + 18: start + 21])
+            for i in (start, start + 1, start + 2,
+                      start + 9, start + 10, start + 11,
+                      start + 18, start + 19, start + 20):
+                if not self.data[i]:
+                    box.update(ops[to_explore.index(i)][2])
+            if not {1,2,3,4,5,6,7,8,9}.issubset(box):
+                self.data = in_queue.get()
+                continue
+            
             values = tuple(values)
             for value in values[:-1]:
                 next_option = self.data.copy()
@@ -80,14 +108,17 @@ class SudokuSolver(threading.Thread):
         self.lock = threading.Lock()
         self.solution_lock = threading.Lock()
         self.solution = ()
+        self.start_time = 0
     def new(self, sudoku):
         self.lock.acquire()
 
         self.data = sudoku
         self.solution = ()
-        self.to_process.put(sudoku)
-
+        self.start_time = time.time()
+        
         self.lock.release()
+        
+        self.to_process.put(sudoku)
 
     def refresh(self):
         with self.solution_lock:
@@ -115,6 +146,7 @@ class SudokuSolver(threading.Thread):
                 if 0 not in result:
                     with self.solution_lock:
                         self.solution = result
+                        print('Duration: %s' % (time.time() - self.start_time))
                 else:
                     self.to_process.put(result)
     def stop(self):
