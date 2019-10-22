@@ -1,3 +1,4 @@
+import cProfile as profile
 import time
 
 import lib
@@ -34,8 +35,12 @@ HARDBRUTE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 8, 5, 0, 0, 1, 0,
              0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 7, 3, 0, 0, 2,
              0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 9]
 
+p = profile.Profile()
+p.enable()
 for (name, sudoku) in (('HARDEST', HARDEST),
                        ('EASY17', EASY17),
                        ('EASY8802', EASY8802),
                        ('HARDBRUTE', HARDBRUTE)):
     print(name, bench(10, sudoku))
+p.disable()
+p.print_stats(sort='tottime')

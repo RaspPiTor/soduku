@@ -24,39 +24,40 @@ class Solver:
                 self.apply_number(i)
 
     def hidden_singles(self, square):
-        value = self.options[square]
-        self.options[square] = 0
+        options = self.options
+        value = options[square]
+        options[square] = 0
         row_start = square // 9 * 9
         column_start = square % 9
         box_start = square // 3 % 3 * 3 + square // 27 * 27
         needed = (SUDOKU_MAX
-                  - ((self.options[row_start + 8]
-                      | self.options[row_start + 7]
-                      | self.options[row_start + 6]
-                      | self.options[row_start + 5]
-                      | self.options[row_start + 4]
-                      | self.options[row_start + 3]
-                      | self.options[row_start + 2]
-                      | self.options[row_start + 1]
-                      | self.options[row_start])
-                     & (self.options[column_start + 72]
-                        | self.options[column_start + 63]
-                        | self.options[column_start + 54]
-                        | self.options[column_start + 45]
-                        | self.options[column_start + 36]
-                        | self.options[column_start + 27]
-                        | self.options[column_start + 18]
-                        | self.options[column_start + 9]
-                        | self.options[column_start])
-                     & (self.options[box_start + 20]
-                        | self.options[box_start + 19]
-                        | self.options[box_start + 18]
-                        | self.options[box_start + 11]
-                        | self.options[box_start + 10]
-                        | self.options[box_start + 9]
-                        | self.options[box_start + 2]
-                        | self.options[box_start + 1]
-                        | self.options[box_start])))
+                  - ((options[row_start + 8]
+                      | options[row_start + 7]
+                      | options[row_start + 6]
+                      | options[row_start + 5]
+                      | options[row_start + 4]
+                      | options[row_start + 3]
+                      | options[row_start + 2]
+                      | options[row_start + 1]
+                      | options[row_start])
+                     & (options[column_start + 72]
+                        | options[column_start + 63]
+                        | options[column_start + 54]
+                        | options[column_start + 45]
+                        | options[column_start + 36]
+                        | options[column_start + 27]
+                        | options[column_start + 18]
+                        | options[column_start + 9]
+                        | options[column_start])
+                     & (options[box_start + 20]
+                        | options[box_start + 19]
+                        | options[box_start + 18]
+                        | options[box_start + 11]
+                        | options[box_start + 10]
+                        | options[box_start + 9]
+                        | options[box_start + 2]
+                        | options[box_start + 1]
+                        | options[box_start])))
         option_count = OPTION_COUNT_CACHE[needed]
         if option_count == 0:
             self.options[square] = value
@@ -155,7 +156,7 @@ class Solver:
                     clone.apply_number(min_pos)
                     routes.append(clone)
                 self.options[min_pos] = SUDOKU_VALUES[item - 1]
-                self.apply_number(min_pos_x)
+                self.apply_number(min_pos)
             else:
                 return True
 
