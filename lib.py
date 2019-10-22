@@ -72,41 +72,42 @@ class Solver:
             return False
 
     def apply_number(self, square):
-        value = self.options[square]
+        options = self.options
+        value = options[square]
         not_value = SUDOKU_MAX - value
         column_start = square % 9
         row_start = square - column_start
         box_start = square // 3 % 3 * 3 + square // 27 * 27
-        self.options[row_start + 8] &= not_value
-        self.options[row_start + 7] &= not_value
-        self.options[row_start + 6] &= not_value
-        self.options[row_start + 5] &= not_value
-        self.options[row_start + 4] &= not_value
-        self.options[row_start + 3] &= not_value
-        self.options[row_start + 2] &= not_value
-        self.options[row_start + 1] &= not_value
-        self.options[row_start] &= not_value
+        options[row_start + 8] &= not_value
+        options[row_start + 7] &= not_value
+        options[row_start + 6] &= not_value
+        options[row_start + 5] &= not_value
+        options[row_start + 4] &= not_value
+        options[row_start + 3] &= not_value
+        options[row_start + 2] &= not_value
+        options[row_start + 1] &= not_value
+        options[row_start] &= not_value
 
-        self.options[column_start + 72] &= not_value
-        self.options[column_start + 63] &= not_value
-        self.options[column_start + 54] &= not_value
-        self.options[column_start + 45] &= not_value
-        self.options[column_start + 36] &= not_value
-        self.options[column_start + 27] &= not_value
-        self.options[column_start + 18] &= not_value
-        self.options[column_start + 9] &= not_value
-        self.options[column_start] &= not_value
+        options[column_start + 72] &= not_value
+        options[column_start + 63] &= not_value
+        options[column_start + 54] &= not_value
+        options[column_start + 45] &= not_value
+        options[column_start + 36] &= not_value
+        options[column_start + 27] &= not_value
+        options[column_start + 18] &= not_value
+        options[column_start + 9] &= not_value
+        options[column_start] &= not_value
 
-        self.options[box_start + 20] &= not_value
-        self.options[box_start + 19] &= not_value
-        self.options[box_start + 18] &= not_value
-        self.options[box_start + 11] &= not_value
-        self.options[box_start + 10] &= not_value
-        self.options[box_start + 9] &= not_value
-        self.options[box_start + 2] &= not_value
-        self.options[box_start + 1] &= not_value
-        self.options[box_start] &= not_value
-        self.options[square] = value
+        options[box_start + 20] &= not_value
+        options[box_start + 19] &= not_value
+        options[box_start + 18] &= not_value
+        options[box_start + 11] &= not_value
+        options[box_start + 10] &= not_value
+        options[box_start + 9] &= not_value
+        options[box_start + 2] &= not_value
+        options[box_start + 1] &= not_value
+        options[box_start] &= not_value
+        options[square] = value
 
     def process(self, routes):
         values = []
