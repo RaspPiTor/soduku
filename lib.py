@@ -1,6 +1,30 @@
 import copy
 
-from consts import SUDOKU_VALUES, SUDOKU_MAX, OPTION_COUNT_CACHE
+SUDOKU_VALUES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+SUDOKU_MAX = 511
+OPTION_COUNT_CACHE = [
+    0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2,
+    3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3,
+    3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3,
+    4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4,
+    3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5,
+    6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4,
+    4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5,
+    6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5,
+    3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3,
+    4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6,
+    6, 7, 6, 7, 7, 8, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3,
+    4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
+    4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3,
+    4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6,
+    6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6,
+    7, 5, 6, 6, 7, 6, 7, 7, 8, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+    3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4,
+    5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8, 3, 4,
+    4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6,
+    7, 6, 7, 7, 8, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8, 5, 6, 6, 7,
+    6, 7, 7, 8, 6, 7, 7, 8, 7, 8, 8, 9
+    ] # Basically just .count_ones()
 
 
 class SudokuEmpty:
@@ -109,6 +133,85 @@ class Solver:
         options[box_start] &= not_value
         options[square] = value
 
+    def scan(self):
+        def generate_masks_from_intersections(isec, only):
+            only[0] |= isec[0] & (SUDOKU_MAX - ((isec[1] | isec[2]) & (isec[3] | isec[6])))
+            only[1] |= isec[1] & (SUDOKU_MAX - ((isec[0] | isec[2]) & (isec[4] | isec[7])))
+            only[2] |= isec[2] & (SUDOKU_MAX - ((isec[0] | isec[1]) & (isec[5] | isec[8])))
+
+            only[3] |= isec[3] & (SUDOKU_MAX - ((isec[4] | isec[5]) & (isec[0] | isec[6])))
+            only[4] |= isec[4] & (SUDOKU_MAX - ((isec[3] | isec[5]) & (isec[1] | isec[7])))
+            only[5] |= isec[5] & (SUDOKU_MAX - ((isec[3] | isec[4]) & (isec[2] | isec[8])))
+
+            only[6] |= isec[6] & (SUDOKU_MAX - ((isec[7] | isec[8]) & (isec[0] | isec[3])))
+            only[7] |= isec[7] & (SUDOKU_MAX - ((isec[6] | isec[8]) & (isec[1] | isec[4])))
+            only[8] |= isec[8] & (SUDOKU_MAX - ((isec[6] | isec[7]) & (isec[2] | isec[5])))
+            resultant_mask = [
+                SUDOKU_MAX - (only[1] | only[2] | only[3] | only[6]),
+                SUDOKU_MAX - (only[0] | only[2] | only[4] | only[7]),
+                SUDOKU_MAX - (only[0] | only[1] | only[5] | only[8]),
+                SUDOKU_MAX - (only[0] | only[4] | only[5] | only[6]),
+                SUDOKU_MAX - (only[1] | only[3] | only[5] | only[7]),
+                SUDOKU_MAX - (only[2] | only[3] | only[4] | only[8]),
+                SUDOKU_MAX - (only[0] | only[3] | only[7] | only[8]),
+                SUDOKU_MAX - (only[1] | only[4] | only[6] | only[8]),
+                SUDOKU_MAX - (only[2] | only[5] | only[6] | only[7])]
+            return (resultant_mask, only)
+        sudoku = self.options
+        sudoku_check = SUDOKU_MAX
+        for floor_number in (x * 27 for x in range(3)):
+            only = [0] * 9
+            intersections = [0] * 9
+            for i in range(9):
+                intersections[i] = (sudoku[floor_number + i * 3]
+                    | sudoku[floor_number + i * 3 + 1]
+                    | sudoku[floor_number + i * 3 + 2])
+                only[i] = intersections[i] * (OPTION_COUNT_CACHE[intersections[i]] <= 3)
+            (resultant_mask, only) = generate_masks_from_intersections(intersections, only.copy())
+
+            temp_total = 0
+            for (i, (row, only_row)) in enumerate(zip(resultant_mask, only)):
+                temp_total |= row
+                row = row & [SUDOKU_MAX, only_row][(OPTION_COUNT_CACHE[only_row] == 3)]
+                sudoku[floor_number + i * 3] &= row
+                sudoku[floor_number + i * 3 + 1] &= row
+                sudoku[floor_number + i * 3 + 2] &= row
+
+                sudoku_check *= OPTION_COUNT_CACHE[only_row] <= 3
+            sudoku_check &= temp_total
+        if sudoku_check != SUDOKU_MAX:
+            return False
+        for tower_number in (x * 3 for x in range(3)):
+            only = [0] * 9
+            intersections = [0] * 9
+            for column in range(3):
+                for layer in range(3):
+                    i = column * 3 + layer
+                    intersections[i] = (sudoku[tower_number + layer * 27 + column]
+                        | sudoku[tower_number + layer * 27 + column + 9]
+                        | sudoku[tower_number + layer * 27 + column + 18])
+                    only[i] = intersections[i] * (OPTION_COUNT_CACHE[intersections[i]] <= 3)
+            (resultant_mask, only) = generate_masks_from_intersections(intersections, only.copy())
+
+            temp_total = 0
+
+            for column_number in range(3):
+                for layer in range(3):
+                    i = column_number * 3 + layer
+                    column = resultant_mask[i]
+                    only_column = only[i]
+                    temp_total |= column
+                    column = column & [SUDOKU_MAX, only_column][(OPTION_COUNT_CACHE[only_column] == 3)]
+                    sudoku[tower_number + layer * 27 + column_number] &= column
+                    sudoku[tower_number + layer * 27 + column_number + 9] &= column
+                    sudoku[tower_number + layer * 27 + column_number + 18] &= column
+
+                    sudoku_check *= OPTION_COUNT_CACHE[only_column] <= 3
+            sudoku_check &= temp_total
+
+        self.options = sudoku
+        return sudoku_check == SUDOKU_MAX
+
     def process(self, routes):
         values = []
         while 1:
@@ -139,7 +242,8 @@ class Solver:
 
                 else:
                     x += 1
-
+            if not self.scan():
+                return False
             if min_length != 20:
                 values.clear()
                 options = self.options[min_pos]
